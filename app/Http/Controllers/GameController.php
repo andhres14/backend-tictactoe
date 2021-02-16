@@ -209,7 +209,7 @@ class GameController extends Controller
 
             $whoIs = ($game->first_player_id == $request->player) ? $request->player : $game->second_player_id;
             $game->{$boxSelected} = ($game->first_player_id == $request->player) ? self::MARKS['first'] : self::MARKS['second'];
-            $game->current_turn = $request->player;
+            $game->current_turn = ($request->player == $playerInGame->id) ? $request->player : $game->second_player_id;
 
             $gamePending = $this->checkPendingBox($game);
             if (!$gamePending['completed']) {
@@ -219,11 +219,10 @@ class GameController extends Controller
             // check possible winner
             $checkIsaWin = $this->verifyPossibleWinner($game, $game->{$boxSelected});
             if ($checkIsaWin) { // winner
-                $game->winner_id = $whoIs;
                 $game->status = self::GAME_STATUS[1];
                 $game->save();
                 $this->result->gameOver = true;
-                $this->result->winner = "Has Ganado!!!";
+                $this->result->winnerId = $whoIs;
                 $this->result->boxWinners = $checkIsaWin;
             } else {
                 // check if all box have data

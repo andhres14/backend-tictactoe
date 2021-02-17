@@ -85,12 +85,17 @@ class GameController extends Controller
             if (!$playerCreated || !$secondPlayerCreated) {
                 throw new \Exception("Usuarios no encontrados para la partida actual!", Response::HTTP_NOT_FOUND);
             }
+
+            $lastGame = $this->gameModel->getLastGameByFirstPlayerAndSecondPlayer($request->first_player, $request->second_player);
+            if (!$lastGame) {
+                throw new \Exception("No existe una anterior partida, no es posible continuar", Response::HTTP_INTERNAL_SERVER_ERROR);
+            }
             // create new game
             $gameCreated = $this->gameModel
                 ->createOne([
                     'first_player_id' => $playerCreated->id,
                     'second_player_id' => $secondPlayerCreated->id,
-                    'current_turn' => $request->first_player,
+                    'current_turn' => $lastGame->current_turn,
                     'status' => self::GAME_STATUS[0]
                 ]);
 
@@ -101,6 +106,7 @@ class GameController extends Controller
             $this->result->gameId = $gameCreated;
             $this->result->firstPlayer = $playerCreated;
             $this->result->secondPlayer = $secondPlayerCreated;
+            $this->result->currentTurn = $lastGame->current_turn;
             $this->result->gameBoxes = $this->buildGameBoard(false);
             $this->result->message = "Game created";
             return response()->json($this->result, $responseCode);
@@ -176,7 +182,8 @@ class GameController extends Controller
 
             $whoIs = ($game->first_player_id == $request->player) ? $request->player : $game->second_player_id;
             $game->{$boxSelected} = ($game->first_player_id == $request->player) ? self::MARKS['first'] : self::MARKS['second'];
-            $game->current_turn = ($request->player == $playerInGame->id) ? $request->player : $game->second_player_id;
+            $game->current_turn = ($request->player == $playerInGame->id) ? $game->first_player_id : $game->second_player_id;
+            $this->result->currentTurn = $game->current_turn;
 
             $gamePending = $this->checkPendingBox($game);
             if (!$gamePending['completed']) {

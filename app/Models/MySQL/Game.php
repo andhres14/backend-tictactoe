@@ -60,4 +60,14 @@ class Game extends Model
             })
             ->first();
     }
+
+    public function getLastGameByFirstPlayerAndSecondPlayer(int $firstPlayerId,
+                                                            int $secondPlayerId)
+    {
+        return $this
+            ->where($this->table.'.first_player_id', $firstPlayerId)
+            ->where($this->table.'.second_player_id', $secondPlayerId)
+            ->orderBy('id', 'DESC')
+            ->first();
+    }
 }

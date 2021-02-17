@@ -6,6 +6,14 @@ This project was generated with [Laravel](https://laravel.com/docs/7.x) version 
 
 [Laravel Requirements](https://laravel.com/docs/7.x#server-requirements)
 
+## Composer
+
+Run in terminal `composer install` to install the necessary dependencies.
+
+## .env File
+
+Update the credentials in the `.env` file, by those in your on-premises environment
+
 ## Create DB
 
 Run in terminal `php artisan db:create` to create the DB.

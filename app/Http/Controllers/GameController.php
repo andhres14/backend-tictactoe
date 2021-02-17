@@ -99,6 +99,8 @@ class GameController extends Controller
             }
 
             $this->result->gameId = $gameCreated;
+            $this->result->firstPlayer = $playerCreated;
+            $this->result->secondPlayer = $secondPlayerCreated;
             $this->result->gameBoxes = $this->buildGameBoard(false);
             $this->result->message = "Game created";
             return response()->json($this->result, $responseCode);

@@ -186,6 +186,7 @@ class GameController extends Controller
             // check possible winner
             $checkIsaWin = $this->verifyPossibleWinner($game, $game->{$boxSelected});
             if ($checkIsaWin) { // winner
+                $game->winner_id = $request->player;
                 $game->status = self::GAME_STATUS[1];
                 $game->save();
                 $this->result->gameOver = true;

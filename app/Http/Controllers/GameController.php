@@ -164,12 +164,12 @@ class GameController extends Controller
             }
 
             if (!in_array($request->box_selected, self::BOX_GAME)) {
-                throw new \Exception("Caja seleccionada no valida", Response::HTTP_BAD_REQUEST);
+                throw new \Exception("Casilla seleccionada no valida", Response::HTTP_BAD_REQUEST);
             }
 
             $boxSelected = "box_{$request->box_selected}";
             if (isset($game->{$boxSelected})) {
-                throw new \Exception("Caja seleccionada previamente", Response::HTTP_BAD_REQUEST);
+                throw new \Exception("Casilla seleccionada previamente", Response::HTTP_BAD_REQUEST);
             }
 
             $whoIs = ($game->first_player_id == $request->player) ? $request->player : $game->second_player_id;

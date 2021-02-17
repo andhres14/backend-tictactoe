@@ -46,7 +46,7 @@ class PlayerController extends Controller
             $player->nick = $request->input('nick');
             $player->save();
 
-            $this->result->message = "Player updated!";
+            $this->result->message = "Jugador actualizado!";
             return response()->json($this->result, $responseCode);
         } catch (\Exception $e) {
             self::logRecord($e, $this->result);

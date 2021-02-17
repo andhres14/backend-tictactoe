@@ -51,20 +51,7 @@ class GameController extends Controller
             }
 
             $this->result->gameId = $gameCreated;
-
-            // build body game
-            $gameBoxes = [];
-            foreach (self::BOX_GAME as $item) {
-                $boxItem = "box_{$item}";
-                $gameBoxes[$boxItem] = [
-                    'disabled' => false,
-                    'value' => null,
-                    'isWinner' => false
-                ];
-            }
-            // =============
-
-            $this->result->gameBoxes = $gameBoxes;
+            $this->result->gameBoxes = $this->buildGameBoard(false);
             $this->result->firstPlayer = ['id' => $playerCreated->id, 'nick' => $playerCreated->nick];
             $this->result->secondPlayer = ['id' => $secondPlayerCreated->id, 'nick' => $secondPlayerCreated->nick];
             $this->result->message = "Game created";
@@ -112,18 +99,7 @@ class GameController extends Controller
             }
 
             $this->result->gameId = $gameCreated;
-            // build body game
-            $gameBoxes = [];
-            foreach (self::BOX_GAME as $item) {
-                $boxItem = "box_{$item}";
-                $gameBoxes[$boxItem] = [
-                    'disabled' => false,
-                    'value' => null,
-                    'isWinner' => false
-                ];
-            }
-            // =============
-            $this->result->gameBoxes = $gameBoxes;
+            $this->result->gameBoxes = $this->buildGameBoard(false);
             $this->result->message = "Game created";
             return response()->json($this->result, $responseCode);
         } catch (\Exception $e) {
@@ -146,23 +122,11 @@ class GameController extends Controller
                 throw new \Exception("Juego no encontrado o finalizado previamente", Response::HTTP_NOT_FOUND);
             }
 
-            // build body game
-            $gameBoxes = [];
-            foreach (self::BOX_GAME as $item) {
-                $boxItem = "box_{$item}";
-                $gameBoxes[$boxItem] = [
-                    'disabled' => false,
-                    'value' => $game->{$boxItem},
-                    'isWinner' => false
-                ];
-            }
-            // =============
-
             $game->firstPlayer;
             $game->secondPlayer;
 
             $this->result->game = $game;
-            $this->result->gameBoxes = $gameBoxes;
+            $this->result->gameBoxes = $this->buildGameBoard(true, $game);
             return response()->json($this->result, $responseCode);
         } catch (\Exception $e) {
             self::logRecord($e, $this->result);
@@ -193,6 +157,7 @@ class GameController extends Controller
                 throw new \Exception("Juego no encontrado o finalizado previamente", Response::HTTP_NOT_FOUND);
             }
 
+            // validate if the user
             $playerInGame = $this->gameModel->getByGameIdAndPlayerId($id, $request->player);
             if (!$playerInGame) {
                 throw new \Exception("Este jugador no pertenece a esta partida", Response::HTTP_INTERNAL_SERVER_ERROR);
@@ -225,15 +190,16 @@ class GameController extends Controller
                 $this->result->winnerId = $whoIs;
                 $this->result->boxWinners = $checkIsaWin;
             } else {
-                // check if all box have data
+                // check if all boxes have data and there is no winner
                 if ($gamePending['completed']) {
+                    $game->save();
                     $this->result->message = "Empate! la partida ha terminado.";
                     $this->result->gameOver = true;
                     $this->result->winner = false;
+                } else {
+                    $this->result->message = "Selección realizada correctamente!";
                 }
             }
-
-            $this->result->message = "Selección realizada correctamente!";
             return response()->json($this->result, $responseCode);
         } catch (\Exception $e) {
             self::logRecord($e, $this->result);
@@ -251,7 +217,8 @@ class GameController extends Controller
     {
         $result['totalCompleted'] = 0;
         foreach (self::BOX_GAME as $numBox) {
-            if (isset($game->{$numBox})) {
+            $box = "box_{$numBox}";
+            if (isset($game->{$box})) {
                 $result['totalCompleted'] += 1;
             }
         }
@@ -276,5 +243,25 @@ class GameController extends Controller
             }
         }
         return false;
+    }
+
+    /**
+     * Build skeleton board game
+     * @param false $withData
+     * @param $info
+     * @return array
+     */
+    private function buildGameBoard($withData = false, $info = null) {
+        // build body game
+        $gameBoxes = [];
+        foreach (self::BOX_GAME as $item) {
+            $boxItem = "box_{$item}";
+            $gameBoxes[$boxItem] = [
+                'value' => ($withData) ? $info->{$boxItem} : null,
+                'isWinner' => false
+            ];
+        }
+        // =============
+        return $gameBoxes;
     }
 }

@@ -23,7 +23,7 @@ class PlayerController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * Update player name
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  int  $id

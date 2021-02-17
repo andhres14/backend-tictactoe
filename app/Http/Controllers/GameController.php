@@ -182,7 +182,7 @@ class GameController extends Controller
 
             $whoIs = ($game->first_player_id == $request->player) ? $request->player : $game->second_player_id;
             $game->{$boxSelected} = ($game->first_player_id == $request->player) ? self::MARKS['first'] : self::MARKS['second'];
-            $game->current_turn = ($request->player == $playerInGame->id) ? $game->first_player_id : $game->second_player_id;
+            $game->current_turn = ($request->player == $playerInGame->first_player_id) ? $game->second_player_id : $game->first_player_id;
             $this->result->currentTurn = $game->current_turn;
 
             $gamePending = $this->checkPendingBox($game);
